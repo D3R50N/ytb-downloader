@@ -1,0 +1,56 @@
+body {
+    background: #f1f4f3;
+    padding: 0;
+    margin: 0;
+}
+.spinner {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    border-left: 3px solid rgba(255, 255, 255, 0);
+    display: none;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background: #31a31f;
+    color: white;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 15px;
+    width: max-content;
+
+    transition-duration: .2s;
+}
+
+#btn:hover {
+    background: #339122;
+}
+
+
+#tool {
+    margin-top: 10px;
+    text-align: center;
+
+    background: rgba(134, 142, 161, 0.175);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}

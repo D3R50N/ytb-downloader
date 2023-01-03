@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "WIO Saver",
+  "version": "1.0",
+  "description": "Saves images on a website as a zip file",
+  "permissions": ["tabs", "<all_urls>"],
+  "host_permissions": ["<all_urls>", "https://*/","http://*/"],
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html",
+    "default_title": "WIO Saver"
+  }
+}
