@@ -147,7 +147,7 @@ function getDom(html) {
                     img_container_size = r[0].result;
 
                 }
-                
+
 
                 storeFileInZip(images, i, img_container_size, zip).then(() => {
                     updateCounter(srcList);
@@ -292,11 +292,29 @@ function generateFinalZip(zip) {
             return;
         }
 
-        saveAs(content, tab.title + ".zip");
+        var zip_name = tab.url;
+
+        let splitted = zip_name.split("/");
+        
+        splitted.shift();
+        splitted.shift();
+
+        zip_name = "WIO_"+splitted[0]+"_"+getDate()
+        zip_name = escape_str(zip_name);
+        saveAs(content, zip_name + ".zip");
         resetView();
     }).catch(error => {
         resetView();
     });
+}
+
+function getDate() {
+    let now = new Date();
+    return `${twoDigits(now.getDate())}-${twoDigits(now.getMonth()+1)}-${twoDigits(now.getFullYear())}`;
+}
+function twoDigits(num) {
+    if (num < 10) return "0" + num;
+    return num
 }
 
 function obj_len(obj) {
