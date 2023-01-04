@@ -12,7 +12,7 @@
   - [**utils.js**](scripts/utils.js") : fonctions globales
   - [**variables.js**](scripts/variables.js) : variables globales
   - [**zip_utils.js**](scripts/zip_utils.js) : fonctions de traitement du fichier zip
-- [**content.js**]("content.js) : script d'exécusion
+- [**content.js**](content.js) : script d'exécusion
 - [**manifest.json**](manifest.json) : fichier pour Manifest V3
 - [**popup.html**](popup.html) : popup par défaut
 - [**README.md**](README.md) : cette documentation
