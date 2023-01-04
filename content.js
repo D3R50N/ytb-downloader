@@ -125,7 +125,6 @@ function getDom(html) {
         if (srcList.includes(src_attr(images[i]).src))
             continue;
         srcList.push(src_attr(images[i]).src);
-        updateCounter(srcList);
         if (src_attr(images[i]).src == null) {
             nextImg(zip);
             continue;
@@ -148,7 +147,11 @@ function getDom(html) {
                     img_container_size = r[0].result;
 
                 }
-                storeFileInZip(images, i, img_container_size, zip);
+                
+
+                storeFileInZip(images, i, img_container_size, zip).then(() => {
+                    updateCounter(srcList);
+                })
 
             });
 
