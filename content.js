@@ -19,11 +19,6 @@ const percent = document.getElementById("percent");
 const btn = document.getElementById("btn");
 btn.addEventListener('click', getFiles);
 
-const scale = {
-    factor: .8,
-    width: 400,
-    height: 400
-}
 
 
 var isFetching = false;
@@ -39,68 +34,129 @@ getCurrentTab().then((t) => {
     base = base.join("/");
 });
 
+function getSize(srcattr) {
+    // console.log(document.querySelector(`img[${srcattr.attr}="${srcattr.src}"]`))
+    return {
+        w: document.querySelector(`img[${srcattr.attr}="${srcattr.src}"]`).width,
+        h: document.querySelector(`img[${srcattr.attr}="${srcattr.src}"]`).height
+    };
+}
+
 function getFiles() {
     if (tab && !isFetching) {
-        isFetching = true;
-        btn.querySelector(".text").innerHTML = "En cours...   &nbsp;";
-        btn.querySelector(".spinner").style.display = "block";
-        var srcList = [];
-        updateCounter(srcList);
-        fetch(tab.url, {
-                headers: {
-                    "Accept": "text/html",
-                    'Access-Control-Allow-Origin': '*',
-                }
-            })
-            .then((response) => response.text())
-            .then(async (html) => {
-                var parser = new DOMParser();
-                var doc = parser.parseFromString(html, "text/html");
-
-                var images = doc.getElementsByTagName('img');
-
-                getImgCount(images);
-                if (total == 0) {
-                    btn.querySelector(".text").innerHTML = "Aucune image";
-                    btn.querySelector(".spinner").style.display = "none";
-                    count.innerHTML = "";
-                    percent.innerHTML = "Ce site ne contient aucune image ou bloque son contenu";
-                    waitAndReset();
-                }
-
-                const zip = new JSZip();
-
-                for (let i = 0; i < images.length; i++) {
-                    if (srcList.includes(src_attr(images[i]))) continue;
-                    srcList.push(src_attr(images[i]));
-                    updateCounter(srcList);
-
-                    if (src_attr(images[i]) == null) {
-                        nextImg(zip);
-                        
-                        continue;
-                    }
 
 
+        try {
+            getDOMContent()
+        } catch (err) {
+            throw (err);
+            btn.querySelector(".text").innerHTML = "Erreur de récupération";
+            btn.querySelector(".spinner").style.display = "none";
+            count.innerHTML = err.name;
+            percent.innerHTML = err.message;
+            waitAndReset();
 
-                    await storeFileInZip(images, i, zip);
-                }
-
-
-            })
-            .catch((err) => {
-                // throw (err);
-                btn.querySelector(".text").innerHTML = "Erreur de récupération";
-                btn.querySelector(".spinner").style.display = "none";
-                count.innerHTML = err.name;
-                percent.innerHTML = err.message;
-                waitAndReset();
-
-            });
+        };
     }
 
 }
 
+
+function getDOMContent() {
+    chrome.scripting.executeScript({
+            target: {
+                tabId: tab.id,
+                allFrames: true
+            },
+            func: () => {
+                return document.documentElement.outerHTML;
+            },
+        },
+
+        (r) => {
+            if (r[0].result) {
+                var html = r[0].result;
+                console.log("DOM loaded");
+                getDom(html);
+            } else {
+                fetch(tab.url, {
+                        headers: {
+                            "Accept": "text/html",
+                            'Access-Control-Allow-Origin': '*',
+                        }
+                    })
+                    .then((response) => response.text())
+                    .then(async (html) => {
+                        getDom(html);
+                    })
+
+            }
+
+
+        });
+
+}
+
+function getDom(html) {
+    isFetching = true;
+    btn.querySelector(".text").innerHTML = "En cours...   &nbsp;";
+    btn.querySelector(".spinner").style.display = "block";
+    var srcList = [];
+    updateCounter(srcList);
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(html, "text/html");
+
+    var images = doc.getElementsByTagName('img');
+
+    getImgCount(images);
+    if (total == 0) {
+        btn.querySelector(".text").innerHTML = "Aucune image";
+        btn.querySelector(".spinner").style.display = "none";
+        count.innerHTML = "";
+        percent.innerHTML = "Ce site ne contient aucune image ou bloque son contenu";
+        waitAndReset();
+    }
+
+    const zip = new JSZip();
+
+
+
+    for (let i = 0; i < images.length; i++) {
+        if (srcList.includes(src_attr(images[i]).src))
+            continue;
+        srcList.push(src_attr(images[i]).src);
+        updateCounter(srcList);
+        if (src_attr(images[i]).src == null) {
+            nextImg(zip);
+            continue;
+        }
+
+
+        let img_container_size = {};
+
+        chrome.scripting.executeScript({
+                target: {
+                    tabId: tab.id,
+                    allFrames: true
+                },
+                func: getSize,
+                args: [src_attr(images[i])]
+            },
+
+            (r) => {
+                if (r[0].result) {
+                    img_container_size = r[0].result;
+
+                }
+                storeFileInZip(images, i, img_container_size, zip);
+
+            });
+
+
+
+
+    }
+}
 
 function waitAndReset() {
     setTimeout(() => {
@@ -112,14 +168,14 @@ function waitAndReset() {
     }, 2500);
 }
 
-async function storeFileInZip(images, i, zip) {
+async function storeFileInZip(images, i, size, zip) {
     let path;
     let isHttp = false;
-    if (src_attr(images[i]).includes("http")) {
+    if (src_attr(images[i]).src.includes("http")) {
         isHttp = true;
-        path = src_attr(images[i]);
+        path = src_attr(images[i]).src;
     } else {
-        path = base + "/" + src_attr(images[i]);
+        path = base + "/" + src_attr(images[i]).src;
     }
 
     let response;
@@ -145,14 +201,21 @@ async function storeFileInZip(images, i, zip) {
     }
 
 
-    let splitted = src_attr(images[i]).split("/");
+    let splitted = src_attr(images[i]).src.split("/");
     splitted.shift();
     splitted.shift();
     splitted.shift();
 
-    let name = isHttp ? splitted.join("/") : src_attr(images[i]);
+    let name = isHttp ? splitted.join("/") : src_attr(images[i]).src;
 
     name = escape_str(name);
+
+
+    const scale = {
+        width: size.w,
+        height: size.h,
+        factor: .8,
+    }
 
     resizeImageAndStore(blob, zip, name, scale);
 }
@@ -164,12 +227,18 @@ function resizeImageAndStore(blob, zip, name, scale) {
     let img = new Image()
     img.src = URL.createObjectURL(blob);
 
+    img.onerror = () => {
+        nextImg(zip);
+    }
     img.onload = () => {
-        scale.width = img.width * scale.factor;
-        scale.height = img.height * scale.factor;
 
-        canvas.width = scale.width;
-        canvas.height = scale.height;
+        canvas.width = img.width * scale.factor;
+        canvas.height = img.height * scale.factor;
+
+        if (scale.width)
+            canvas.width = scale.width;
+        if (scale.height)
+            canvas.height = scale.height;
 
         context.drawImage(img, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(
@@ -197,14 +266,16 @@ function getImgCount(images) {
     let temp = [];
     total = 0;
     for (let i = 0; i < images.length; i++) {
-        if (!temp.includes(src_attr(images[i])))
+        if (!temp.includes(src_attr(images[i]).src))
             total++;
-        temp.push(src_attr(images[i]));
+        temp.push(src_attr(images[i]).src);
     }
 }
 
 function generateFinalZip(zip) {
+
     if (loadedImages < total) return;
+
     zip.generateAsync({
         type: 'blob'
     }).then(content => {

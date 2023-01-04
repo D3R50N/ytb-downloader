@@ -54,3 +54,6 @@ body {
     justify-content: center;
     align-items: center;
 }
+#img_inner{
+    visibility: hidden;
+}

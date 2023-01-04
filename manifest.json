@@ -3,7 +3,7 @@
   "name": "WIO Saver",
   "version": "1.0",
   "description": "Saves images on a website as a zip file",
-  "permissions": ["tabs", "<all_urls>"],
+  "permissions": ["tabs", "<all_urls>","scripting"],
   "host_permissions": ["<all_urls>", "https://*/","http://*/"],
   "icons": {
     "16": "icon.png",
