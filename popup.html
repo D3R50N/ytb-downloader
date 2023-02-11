@@ -12,11 +12,28 @@
 </head>
 
 <body>
+        <div class="muted" >Par 
+            <a href="https://github.com/D3R50N" target="_blank">@MaxDev</a>
+        </div>
 
-    <button id="btn">
-        <div class="text">Télécharger le zip</div>
-        <div class="spinner"></div>
-    </button>
+    <div class="btn-container">
+        <button id="btn">
+            <div class="text">Télécharger le zip</div>
+            <div class="spinner"></div>
+        </button>
+    </div>
+    <div id="options">
+        <div class="option">
+            <input type="checkbox" id="ignore_icons" checked>
+            <label for="ignore_icons" title="Toutes les images en dessous de 50x50 seront ignorées">Ignorer les icônes</label>
+        </div>
+        <div class="option">
+            <input type="checkbox" id="resize">
+            <label for="resize"
+                title="Les images n'auront pas leur taille originale mais leur taille sur le site">Redimensionner
+                selon les conteneurs </label>
+        
+    </div>
     <div id="tool">
         <b id="count"></b>
         <div id="percent"></div>

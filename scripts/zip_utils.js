@@ -84,6 +84,14 @@ function getImageNameWithExt(name = "") {
 
   return name.split(ext)[0] + ext;
 }
+
+function isIcon(img) {
+  return (
+    img.width <= iconSize &&
+    img.height <= iconSize &&
+    img.width == img.height
+  );
+}
 /**
  * Redimensionne l'image et la sauvegarde
  * @param {Blob} blob les données binaires
@@ -102,15 +110,19 @@ function resizeImageAndStore(blob, zip, name, scale) {
     nextImg(zip);
   };
   img.onload = () => {
-    // dimensions d'origine
-    canvas.width = img.width * scale.factor;
-    canvas.height = img.height * scale.factor;
-
-    // dimensions compressées
-    // if (scale.width)
-    //     canvas.width = scale.width;
-    // if (scale.height)
-    //     canvas.height = scale.height;
+    if (shouldIgnoreIcons() && isIcon(img)) {
+      nextImg(zip);
+      return;
+    }
+    if (shoudResize()) {
+      // dimensions compressées
+      if (scale.width) canvas.width = scale.width;
+      if (scale.height) canvas.height = scale.height;
+    } else {
+      // dimensions d'origine
+      canvas.width = img.width * scale.factor;
+      canvas.height = img.height * scale.factor;
+    }
 
     // on rend l'image sur un canvas et on sauvegarde le canvas en format zip
     context.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -132,6 +144,7 @@ function resizeImageAndStore(blob, zip, name, scale) {
  */
 function nextImg(zip) {
   loadedImages++;
+   count.innerHTML = "📄" + loadedImages+" sur " + total+ " images";
   percent.innerHTML = Math.floor((loadedImages * 100) / total) + "%";
 
   generateFinalZip(zip);

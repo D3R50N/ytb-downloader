@@ -165,6 +165,7 @@ function getDOMContent() {
  */
 
 function getImagesFromHTML(html) {
+   
   isFetching = true;
   loadedImages = 0;
 
@@ -267,9 +268,9 @@ function resetView() {
  * @param {Array} srcList un tableau de sources
  */
 function updateCounter(srcList) {
-  count.innerHTML = "📄" + counter(srcList, "image");
+//   count.innerHTML = "📄0 sur " + counter(srcList, "image");
   // percent.innerHTML = Math.floor(srcList.length * 100 / total) + "%";
-  percent.innerHTML = "0%";
+//   percent.innerHTML = "0%";
 }
 
 /**
